@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyBot — Agente Inteligente Basado en Reglas</title>
+<style>
+  :root{
+    --paper:#EEE7D8;
+    --card:#FBF8F1;
+    --ink:#2B2A28;
+    --ink-soft:#6B6558;
+    --rule:#C9BFA6;
+    --index-teal:#3E6259;
+    --index-teal-deep:#2A473F;
+    --tab-mustard:#C08A2E;
+    --bot-tab:#3E6259;
+    --user-tab:#8A4F3D;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(255,255,255,0.35), transparent 60%),
+      var(--paper);
+    font-family:'Courier New', ui-monospace, Menlo, Consolas, monospace;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px 16px;
+  }
+
+  .catalog{
+    width:100%;
+    max-width:640px;
+  }
+
+  .drawer-label{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding:0 6px 10px 6px;
+  }
+  .drawer-label .tag{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .drawer-label .num{
+    font-size:11px;
+    letter-spacing:.1em;
+    color:var(--ink-soft);
+    border:1px solid var(--rule);
+    padding:2px 8px;
+    border-radius:2px;
+    background:var(--card);
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03), 0 12px 30px -18px rgba(43,42,40,0.35);
+    overflow:hidden;
+  }
+
+  .header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:20px 22px 16px 22px;
+    border-bottom:1px dashed var(--rule);
+    background:
+      repeating-linear-gradient(180deg, transparent 0 27px, rgba(43,42,40,0.05) 27px 28px);
+  }
+  .header .mark{
+    width:38px;height:38px;
+    flex:none;
+    border-radius:50%;
+    background:var(--index-teal);
+    color:var(--card);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:-.02em;
+  }
+  .header h1{
+    margin:0;
+    font-size:19px;
+    letter-spacing:.01em;
+  }
+  .header p{
+    margin:2px 0 0 0;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .status{
+    margin-left:auto;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--index-teal);}
+
+  #log{
+    height:420px;
+    overflow-y:auto;
+    padding:18px 22px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 27px, rgba(43,42,40,0.04) 27px 28px);
+  }
+  #log::-webkit-scrollbar{width:9px;}
+  #log::-webkit-scrollbar-thumb{background:var(--rule); border-radius:6px;}
+
+  .row{display:flex;}
+  .row.bot{justify-content:flex-start;}
+  .row.user{justify-content:flex-end;}
+
+  .bubble{
+    max-width:78%;
+    padding:9px 13px;
+    border-radius:3px;
+    font-size:13.5px;
+    line-height:1.5;
+    white-space:pre-wrap;
+    position:relative;
+  }
+  .row.bot .bubble{
+    background:#fff;
+    border:1px solid var(--rule);
+    border-left:3px solid var(--bot-tab);
+  }
+  .row.user .bubble{
+    background:#fff;
+    border:1px solid var(--rule);
+    border-right:3px solid var(--user-tab);
+  }
+  .who{
+    display:block;
+    font-size:9.5px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    margin-bottom:4px;
+    color:var(--ink-soft);
+  }
+  .row.bot .who{color:var(--bot-tab);}
+  .row.user .who{color:var(--user-tab); text-align:right;}
+
+  form{
+    display:flex;
+    gap:10px;
+    padding:16px 18px;
+    border-top:1px dashed var(--rule);
+    background:var(--card);
+  }
+  input[type=text]{
+    flex:1;
+    font-family:inherit;
+    font-size:13.5px;
+    padding:11px 12px;
+    border:1px solid var(--rule);
+    border-radius:3px;
+    background:#fff;
+    color:var(--ink);
+    outline:none;
+  }
+  input[type=text]:focus{
+    border-color:var(--index-teal);
+    box-shadow:0 0 0 3px rgba(62,98,89,0.12);
+  }
+  button{
+    font-family:inherit;
+    font-size:12.5px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding:0 18px;
+    border:none;
+    border-radius:3px;
+    background:var(--index-teal);
+    color:#fff;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  button:hover{background:var(--index-teal-deep);}
+  button:active{transform:translateY(1px);}
+
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 22px 18px 22px;
+    font-size:11px;
+    color:var(--ink-soft);
+  }
+  .toolbar button.ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--rule);
+    padding:6px 12px;
+    text-transform:none;
+    letter-spacing:0;
+    font-size:11px;
+  }
+  .toolbar button.ghost:hover{
+    background:#fff;
+    color:var(--ink);
+  }
+
+  .hint{
+    font-size:10.5px;
+    color:var(--ink-soft);
+  }
+  .hint b{color:var(--ink);}
+
+  @media (max-width:480px){
+    #log{height:62vh;}
+    .header{padding:16px;}
+    form,.toolbar{padding-left:14px;padding-right:14px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="catalog">
+  <div class="drawer-label">
+    <span class="tag">Fichero de Conocimiento &middot; Base de Reglas</span>
+    <span class="num">FICHA N.º 01</span>
+  </div>
+
+  <div class="card">
+    <div class="header">
+      <div class="mark">Py</div>
+      <div>
+        <h1>PyBot</h1>
+        <p>Agente inteligente basado en reglas &middot; PLN por coincidencia de palabras clave</p>
+      </div>
+      <div class="status"><span class="dot"></span> en línea</div>
+    </div>
+
+    <div id="log"></div>
+
+    <form id="form" autocomplete="off">
+      <input id="input" type="text" placeholder="Escribe un mensaje… (ej. hola, ayuda, salir)" />
+      <button type="submit">Enviar</button>
+    </form>
+
+    <div class="toolbar">
+      <span class="hint">Escribe <b>ayuda</b> para ver opciones &middot; <b>salir</b> para terminar</span>
+      <button class="ghost" id="download-btn" type="button">Descargar historial (.json)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==============================================================================
+ * PYBOT — VERSIÓN WEB (HTML + JavaScript)
+ * ------------------------------------------------------------------------------
+ * Traducción fiel del motor de reglas del script original en Python
+ * (chatbot_pybot_documentado.py). La lógica de PLN, la Base de Conocimiento,
+ * el motor de respuestas y el manejo de contexto se conservan idénticos;
+ * solo cambia la interfaz (de consola a navegador) y la persistencia
+ * (de archivo .json en disco a descarga manual, ya que un navegador no puede
+ * escribir directamente en el sistema de archivos del usuario).
+ * ==============================================================================
+ */
+
+// ------------------------------------------------------------------------------
+// SECCIÓN 2: BASE DE CONOCIMIENTO
+// ------------------------------------------------------------------------------
+const BASE_CONOCIMIENTO = {
+  "hola": [
+    "¡Hola! Soy PyBot. ¿En qué puedo ayudarte?",
+    "¡Hola de nuevo! ¿Qué tal todo?",
+    "¡Hey! Aquí estoy, listo para chatear."
+  ],
+  "buenos dias": "¡Buenos días! Espero que tengas un excelente día.",
+  "buenas tardes": "¡Buenas tardes! ¿Qué necesitas?",
+  "buenas noches": "¡Buenas noches! Estoy listo para ayudarte.",
+
+  "como estas": [
+    "Estoy funcionando correctamente. ¡Gracias por preguntar!",
+    "¡Todo bien por aquí, listo para responder tus dudas!",
+    "Excelente, procesando a toda velocidad. ¿Y tú cómo estás?"
+  ],
+  "y tu como estas": "¡Muy bien, gracias por preguntar! Siempre feliz de charlar.",
+
+  "quien eres": "Soy PyBot, un chatbot desarrollado en Python.",
+  "que eres": "Soy un agente inteligente basado en reglas.",
+  "que sabes hacer": "Puedo conversar sobre IA, hardware, software, Python, contarte un chiste, decirte la hora o la fecha. Escribe 'ayuda' para ver todo.",
+  "que puedes hacer": "Puedo conversar sobre IA, hardware, software, Python, contarte un chiste, decirte la hora o la fecha. Escribe 'ayuda' para ver todo.",
+
+  "inteligencia artificial": "La Inteligencia Artificial permite que las máquinas aprendan y tomen decisiones.",
+  "aprendizaje automatico": "El aprendizaje automático (machine learning) es una rama de la IA donde los modelos aprenden patrones a partir de datos.",
+  "hardware": "El hardware corresponde a todas las partes físicas del computador.",
+  "software": "El software es el conjunto de programas que utiliza un computador.",
+  "python": "Python es un lenguaje de programación muy utilizado en Inteligencia Artificial.",
+  "que es un chatbot": "Un chatbot es un programa que simula una conversación con un humano, usando reglas o modelos de lenguaje.",
+
+  "cuentame un chiste": "CHISTE",
+  "dime un chiste": "CHISTE",
+  "que hora es": "HORA",
+  "que dia es hoy": "FECHA",
+  "cual es la fecha": "FECHA",
+  "me llamo": "NOMBRE",
+  "mi nombre es": "NOMBRE",
+  "ayuda": "AYUDA",
+  "menu": "AYUDA",
+
+  "gracias": [
+    "¡Con gusto! Estoy para ayudarte.",
+    "¡No hay de qué!",
+    "Para eso estoy. 😊"
+  ],
+  "adios": [
+    "¡Hasta luego! Fue un placer conversar contigo.",
+    "¡Nos vemos pronto!",
+    "¡Chao! Que tengas un excelente día."
+  ]
+};
+
+const CHISTES = [
+  "¿Por qué los programadores prefieren el frío? Porque odian los bugs.",
+  "¿Sabes por qué Python no usa gafas? Porque ya tiene 'snake eyes'.",
+  "Un programador va al supermercado, su esposa le dice: compra pan y si hay huevos, trae 6. Volvió con 6 panes.",
+  "¿Cuál es el colmo de un programador? Que su hijo se llame Python y su hija Java."
+];
+
+// ------------------------------------------------------------------------------
+// SECCIÓN 3: NORMALIZACIÓN DE TEXTO (PREPROCESAMIENTO DE PLN)
+// ------------------------------------------------------------------------------
+function limpiarTexto(texto) {
+  texto = texto.toLowerCase();
+  // Descompone acentos (NFD) y los elimina, igual que unicodedata + ascii en Python
+  texto = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const caracteres = ",.;:¿?¡!()[]{}";
+  for (const c of caracteres) {
+    texto = texto.split(c).join("");
+  }
+  return texto.trim();
+}
+
+// ------------------------------------------------------------------------------
+// SECCIÓN 4: FUNCIONES DE DIÁLOGO ESPECIALES
+// ------------------------------------------------------------------------------
+function responderHora() {
+  const ahora = new Date();
+  const hh = String(ahora.getHours()).padStart(2, "0");
+  const mm = String(ahora.getMinutes()).padStart(2, "0");
+  const ss = String(ahora.getSeconds()).padStart(2, "0");
+  return `Son las ${hh}:${mm}:${ss}.`;
+}
+
+function responderFecha() {
+  const hoy = new Date();
+  const dd = String(hoy.getDate()).padStart(2, "0");
+  const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+  const yyyy = hoy.getFullYear();
+  return `Hoy es ${dd}/${mm}/${yyyy}.`;
+}
+
+function responderChiste() {
+  return CHISTES[Math.floor(Math.random() * CHISTES.length)];
+}
+
+function responderAyuda() {
+  return (
+    "Puedo ayudarte con estos temas:\n" +
+    "  - Saludos (hola, buenos días, etc.)\n" +
+    "  - Hablar sobre IA, hardware, software y Python\n" +
+    "  - Decirte la hora ('qué hora es') o la fecha ('qué día es hoy')\n" +
+    "  - Contarte un chiste ('cuéntame un chiste')\n" +
+    "  - Recordar tu nombre (dime 'me llamo ...')\n" +
+    "  - Escribe 'salir' para terminar la conversación"
+  );
+}
+
+function extraerNombre(textoLimpio) {
+  for (const frase of ["me llamo", "mi nombre es"]) {
+    if (textoLimpio.includes(frase)) {
+      const partes = textoLimpio.split(frase);
+      const resto = partes.slice(1).join(frase).trim();
+      if (resto) {
+        // Equivalente a .title() de Python: mayúscula inicial en cada palabra
+        return resto.replace(/\b\w/g, (l) => l.toUpperCase());
+      }
+    }
+  }
+  return null;
+}
+
+// ------------------------------------------------------------------------------
+// SECCIÓN 5: MOTOR DE RESPUESTAS (NÚCLEO DE LA INTELIGENCIA DEL CHATBOT)
+// ------------------------------------------------------------------------------
+const contexto = { nombreUsuario: null };
+
+function obtenerRespuestaIA(entrada) {
+  const texto = limpiarTexto(entrada);
+
+  // Paso 1: ¿el usuario se está presentando?
+  if (texto.includes("me llamo") || texto.includes("mi nombre es")) {
+    const nombre = extraerNombre(texto);
+    if (nombre) {
+      contexto.nombreUsuario = nombre;
+      return `¡Mucho gusto, ${nombre}! A partir de ahora te recordaré durante esta conversación.`;
+    }
+  }
+
+  // Paso 2: ¿pregunta su propio nombre?
+  if (["cual es mi nombre", "como me llamo", "sabes mi nombre"].includes(texto)) {
+    if (contexto.nombreUsuario) {
+      return `Tu nombre es ${contexto.nombreUsuario}, ¿cierto?`;
+    }
+    return "Todavía no me has dicho tu nombre. Dime 'me llamo ...' para que lo recuerde.";
+  }
+
+  // Paso 3: búsqueda de la coincidencia más larga (más específica)
+  let mejorCoincidencia = null;
+  let mayorLongitud = 0;
+  for (const clave in BASE_CONOCIMIENTO) {
+    if (texto.includes(clave) && clave.length > mayorLongitud) {
+      mayorLongitud = clave.length;
+      mejorCoincidencia = BASE_CONOCIMIENTO[clave];
+    }
+  }
+
+  if (mejorCoincidencia) {
+    if (mejorCoincidencia === "HORA") return responderHora();
+    if (mejorCoincidencia === "FECHA") return responderFecha();
+    if (mejorCoincidencia === "CHISTE") return responderChiste();
+    if (mejorCoincidencia === "AYUDA") return responderAyuda();
+    if (mejorCoincidencia === "NOMBRE") return "Cuéntame, ¿cómo te llamas?";
+
+    let respuestaFinal = Array.isArray(mejorCoincidencia)
+      ? mejorCoincidencia[Math.floor(Math.random() * mejorCoincidencia.length)]
+      : mejorCoincidencia;
+
+    if (contexto.nombreUsuario && Math.random() < 0.3) {
+      respuestaFinal = `${respuestaFinal} (dime, ${contexto.nombreUsuario}, ¿algo más?)`;
+    }
+    return respuestaFinal;
+  }
+
+  // Paso 5: respuesta por defecto
+  return "Lo siento, todavía no conozco la respuesta. Puedes preguntarme sobre hardware, software, Python o inteligencia artificial. Escribe 'ayuda' para ver más opciones.";
+}
+
+// ------------------------------------------------------------------------------
+// SECCIÓN 6: PERSISTENCIA DEL HISTORIAL (descarga en el navegador)
+// ------------------------------------------------------------------------------
+let historial = [];
+
+function descargarHistorial() {
+  const blob = new Blob([JSON.stringify(historial, null, 4)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "historial_chat.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ------------------------------------------------------------------------------
+// SECCIÓN 7: INTERFAZ / BUCLE DE CONVERSACIÓN
+// ------------------------------------------------------------------------------
+const log = document.getElementById("log");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+
+function agregarBurbuja(quien, texto) {
+  const row = document.createElement("div");
+  row.className = "row " + (quien === "PyBot" ? "bot" : "user");
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  const who = document.createElement("span");
+  who.className = "who";
+  who.textContent = quien;
+  bubble.appendChild(who);
+  bubble.appendChild(document.createTextNode(texto));
+  row.appendChild(bubble);
+  log.appendChild(row);
+  log.scrollTop = log.scrollHeight;
+}
+
+function registrarHistorial(usuario, respuesta) {
+  historial.push({
+    fecha: new Date().toISOString().slice(0, 19).replace("T", " "),
+    usuario,
+    respuesta
+  });
+}
+
+function bienvenida() {
+  agregarBurbuja("PyBot", "¡Hola! Soy PyBot, tu agente inteligente basado en reglas. Escribe 'ayuda' para ver opciones o 'salir' para terminar.");
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const mensaje = input.value;
+  if (mensaje.trim() === "") return;
+
+  agregarBurbuja("Usuario", mensaje);
+  input.value = "";
+
+  if (limpiarTexto(mensaje) === "salir") {
+    let despedida = "¡Hasta pronto!";
+    if (contexto.nombreUsuario) despedida = `¡Hasta pronto, ${contexto.nombreUsuario}!`;
+    agregarBurbuja("PyBot", despedida);
+    registrarHistorial(mensaje, despedida);
+    input.disabled = true;
+    form.querySelector("button").disabled = true;
+    descargarHistorial();
+    return;
+  }
+
+  const respuesta = obtenerRespuestaIA(mensaje);
+  agregarBurbuja("PyBot", respuesta);
+  registrarHistorial(mensaje, respuesta);
+});
+
+document.getElementById("download-btn").addEventListener("click", descargarHistorial);
+
+bienvenida();
+input.focus();
+</script>
+</body>
+</html>
