@@ -90,8 +90,8 @@ Todas las librerías son parte de la **librería estándar de Python**.
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/pybot.git
-cd pybot
+git clone https://github.com/Benan0/Pybot.git
+cd Pybot
 
 # Ejecutar
 python pybot.py
@@ -106,7 +106,7 @@ Comandos disponibles dentro del chat:
 ## 📁 Estructura del proyecto
 
 ```
-pybot/
+Pybot/
 ├── pybot.py              # Código principal del chatbot
 ├── historial_chat.json   # Se genera automáticamente al salir
 └── README.md
@@ -122,6 +122,11 @@ pybot/
 
 ---
 
+## 📄 Licencia
+
+MIT — software libre, sin restricciones de autor para uso académico.
+
+---
 ## 📄 Licencia
 
 MIT — software libre, sin restricciones de autor para uso académico.
