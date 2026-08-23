@@ -1,12 +1,10 @@
-# ==============================================================================
-# PROYECTO ACADÉMICO: CHATBOT CON IA Y PROCESAMIENTO DE LENGUAJE NATURAL (PLN)
-# NOMBRE DEL PRODUCTO: PyBot
-# LENGUAJE: Python 3
-# LICENCIA: MIT (software libre, sin restricciones de autor para uso académico)
-# ==============================================================================
+## @mainpage Documentación de PyBot
+# @section intro_sec PROYECTO ACADÉMICO: CHATBOT CON IA Y PROCESAMIENTO DE LENGUAJE NATURAL (PLN)
+# - **NOMBRE DEL PRODUCTO**: PyBot
+# - **LENGUAJE**: Python 3
+# - **LICENCIA**: MIT (software libre, sin restricciones de autor para uso académico)
 #
-# DESCRIPCIÓN GENERAL DEL PROYECTO
-# ------------------------------------------------------------------------------
+# @section desc_sec DESCRIPCIÓN GENERAL DEL PROYECTO
 # PyBot es un "agente inteligente basado en reglas" (Rule-Based AI Agent), un
 # tipo de Inteligencia Artificial simbólica que NO utiliza redes neuronales ni
 # modelos entrenados con datos masivos, sino un sistema experto de reconocimiento
@@ -14,11 +12,12 @@
 #
 # El "Procesamiento de Lenguaje Natural" (PLN / NLP) que aplica este programa
 # consiste en:
-#   1. Normalización de texto (quitar tildes, mayúsculas, signos de puntuación)[cite: 1].
-#   2. Búsqueda de coincidencias de palabras clave (keyword matching)[cite: 1].
-#   3. Selección de la mejor coincidencia (la palabra clave más larga/específica)[cite: 1].
-#   4. Generación de una respuesta fija, aleatoria o dinámica (hora, fecha, etc.)[cite: 1].
-# ==============================================================================
+# 1. Normalización de texto (quitar tildes, mayúsculas, signos de puntuación)[cite: 1].
+# 2. Búsqueda de coincidencias de palabras clave (keyword matching)[cite: 1].
+# 3. Selección de la mejor coincidencia (la palabra clave más larga/específica)[cite: 1].
+# 4. Generación de una respuesta fija, aleatoria o dinámica (hora, fecha, etc.)[cite: 1].
+#
+
 
 import json
 import random
